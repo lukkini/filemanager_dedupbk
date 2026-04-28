@@ -121,7 +121,7 @@ bash organize_backup_dedup.sh \
 Type-based organization can split a meaningful folder:
 
 ```text
-Chloe/
+
   video.mp4
   notes.docx
   document.pdf
@@ -141,10 +141,7 @@ Contextual organization preserves folder meaning first:
 ```text
 ORGANIZED_UNIQUE_CONTEXTUAL/
   by_context/
-    Andre/
-      Andre_celu_11062022/
-        Chloe/
-          2022/
+              2022/
             video.mp4
           notes.docx
           document.pdf
