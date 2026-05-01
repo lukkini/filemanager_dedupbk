@@ -711,3 +711,93 @@ The final executor does not guess. It uses exactly the file passed with:
 --plan organization_plan_final.tsv
 ```
 
+
+# execute_organization_plan_rsync_batch_v3
+
+Fast batch executor for final reviewed organization plans.
+
+## Why this version is faster
+
+The previous executor launched one `rsync` process per file.
+
+This version:
+
+1. reads the plan,
+2. creates a temporary symlink tree with the final organized structure,
+3. runs **one single rsync**:
+
+```bash
+rsync -aL --ignore-existing --info=progress2 STAGING/ DEST_ROOT/
+```
+
+The `-L` option dereferences symlinks, so the destination receives **real independent files**, not symlinks.
+
+## Dry-run
+
+```bash
+python3 execute_organization_plan_rsync_batch_v3.py \
+  --plan work_Andre/reports/organization_plan_final.tsv \
+  --log work_Andre/execute_batch.log \
+  --source-root /run/media/lucas/HDD/to_do_backup_2023_02/Andre \
+  --dest-parent /run/media/lucas/HDD/to_do_backup_2023_02 \
+  --dest-prefix ORGANIZED_UNIQUE_CONTEXTUAL
+```
+
+No files are copied without `--execute`.
+
+## Execute
+
+```bash
+python3 execute_organization_plan_rsync_batch_v3.py \
+  --plan work_Andre/reports/organization_plan_final.tsv \
+  --log work_Andre/execute_batch.log \
+  --execute \
+  --source-root /run/media/lucas/HDD/to_do_backup_2023_02/Andre \
+  --dest-parent /run/media/lucas/HDD/to_do_backup_2023_02 \
+  --dest-prefix ORGANIZED_UNIQUE_CONTEXTUAL
+```
+
+This copies to:
+
+```text
+/run/media/lucas/HDD/to_do_backup_2023_02/ORGANIZED_UNIQUE_CONTEXTUAL_Andre
+```
+
+## Explicit destination root
+
+```bash
+python3 execute_organization_plan_rsync_batch_v3.py \
+  --plan work_Andre/reports/organization_plan_final.tsv \
+  --log work_Andre/execute_batch.log \
+  --execute \
+  --dest-root /run/media/lucas/HDD/to_do_backup_2023_02/ORGANIZED_UNIQUE_CONTEXTUAL_Andre
+```
+
+## Extra rsync flags
+
+You can pass extra rsync args:
+
+```bash
+--rsync-arg --checksum
+```
+
+or:
+
+```bash
+--rsync-arg --bwlimit=50M
+```
+
+## Safety
+
+- Dry-run by default
+- Does not delete originals
+- Does not move originals
+- Does not overwrite destination files
+- Uses `--ignore-existing`
+- Destination can be outside analyzed folder
+- Copies are independent files
+
+## Notes
+
+The staging directory contains symlinks only. It is temporary and deleted after rsync unless `--keep-staging` is used.
+
